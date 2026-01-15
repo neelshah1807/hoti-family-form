@@ -30,7 +30,6 @@ button {
   <input id="hotiNo" oninput="handleHotiChange()">
 </div>
 
-<!-- MAIN FAMILY MEMBERS -->
 <h2>Main Family Members</h2>
 <table id="familyTable">
 <tr>
@@ -54,7 +53,6 @@ button {
 
 <button onclick="addFamilyRow()">Add Family Member</button>
 
-<!-- SUVANI SECTION -->
 <h2>Details of Married Daughters / Suvanis</h2>
 <table id="suvaniTable">
 <tr>
@@ -86,7 +84,6 @@ button {
 let famSr = 0;
 let autoCreated = false;
 
-/* HANDLE HOTI CHANGE */
 function handleHotiChange() {
   const name = hotiName.value.trim();
   const no   = hotiNo.value.trim();
@@ -96,12 +93,10 @@ function handleHotiChange() {
     addSuvaniRow();
     autoCreated = true;
   }
-
   updateHotiInRows();
   updateSuvaniSrNo();
 }
 
-/* UPDATE HOTI IN ALL ROWS */
 function updateHotiInRows() {
   document.querySelectorAll("#familyBody tr").forEach(row => {
     row.cells[1].children[0].value = hotiName.value;
@@ -114,26 +109,20 @@ function updateHotiInRows() {
   });
 }
 
-/* AGE CALCULATION */
 function calcAge(dobInput, ageInput) {
   const dob = new Date(dobInput.value);
   const today = new Date();
-
   let years = today.getFullYear() - dob.getFullYear();
   let months = today.getMonth() - dob.getMonth();
-
   if (today.getDate() < dob.getDate()) months--;
   if (months < 0) { years--; months += 12; }
-
   ageInput.value = years <= 0 ? months + " months" : years;
 }
 
-/* NUMERIC ONLY */
 function numericOnly(el) {
   el.value = el.value.replace(/[^0-9]/g, '');
 }
 
-/* MAIN FAMILY */
 function addFamilyRow() {
   famSr++;
   familyBody.insertRow().innerHTML = `
@@ -165,12 +154,10 @@ function addFamilyRow() {
   </select>
 </td>
 <td><input></td>`;
-
   updateHotiInRows();
   updateSuvaniSrNo();
 }
 
-/* SUVANI */
 function addSuvaniRow() {
   suvaniBody.insertRow().innerHTML = `
 <td></td>
@@ -184,14 +171,18 @@ function addSuvaniRow() {
 <td><input></td>
 <td><input></td>
 <td>Suvani</td>
-<td>Yes</td>
+<td>
+  <select>
+    <option></option>
+    <option>Yes</option>
+    <option>No</option>
+  </select>
+</td>
 <td><input></td>`;
-
   updateHotiInRows();
   updateSuvaniSrNo();
 }
 
-/* UPDATE SUVANI SR NO BASED ON FAMILY COUNT */
 function updateSuvaniSrNo() {
   const base = famSr;
   document.querySelectorAll("#suvaniBody tr").forEach((row, index) => {
@@ -199,7 +190,6 @@ function updateSuvaniSrNo() {
   });
 }
 
-/* EXPORT (UNCHANGED) */
 function exportExcel() {
   const wb = XLSX.utils.book_new();
   const data = [];
@@ -208,7 +198,6 @@ function exportExcel() {
     const table = document.getElementById(tableId);
     data.push([title], []);
     data.push([...table.rows[0].cells].map(c => c.innerText));
-
     for (let i = 1; i < table.rows.length; i++) {
       data.push([...table.rows[i].cells].map(c => {
         const el = c.querySelector("input,select");
@@ -224,6 +213,21 @@ function exportExcel() {
   const ws = XLSX.utils.aoa_to_sheet(data);
   ws["!cols"] = Array(14).fill({ wch: 20 });
 
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+  const border = {
+    top:{style:"thin"}, bottom:{style:"thin"},
+    left:{style:"thin"}, right:{style:"thin"}
+  };
+
+  for (let R = range.s.r; R <= range.e.r; ++R) {
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const cell = XLSX.utils.encode_cell({r:R,c:C});
+      if (ws[cell]) {
+        ws[cell].s = { border, alignment:{horizontal:"center",vertical:"center",wrapText:true}};
+      }
+    }
+  }
+
   XLSX.utils.book_append_sheet(wb, ws, "Hoti Family Data");
   XLSX.writeFile(wb, (hotiNo.value || "Hoti_Database") + ".xlsx");
 }
@@ -231,3 +235,4 @@ function exportExcel() {
 
 </body>
 </html>
+
