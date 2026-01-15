@@ -84,13 +84,13 @@ button {
 let famSr = 0;
 let autoCreated = false;
 
+/* AUTO ADD ONLY FAMILY ROW */
 function handleHotiChange() {
   const name = hotiName.value.trim();
   const no   = hotiNo.value.trim();
 
   if (!autoCreated && name && no) {
-    addFamilyRow();
-    addSuvaniRow();
+    addFamilyRow();      // ✅ ONLY FAMILY
     autoCreated = true;
   }
   updateHotiInRows();
@@ -123,6 +123,7 @@ function numericOnly(el) {
   el.value = el.value.replace(/[^0-9]/g, '');
 }
 
+/* FAMILY */
 function addFamilyRow() {
   famSr++;
   familyBody.insertRow().innerHTML = `
@@ -158,6 +159,7 @@ function addFamilyRow() {
   updateSuvaniSrNo();
 }
 
+/* SUVANI – ONLY ON BUTTON CLICK */
 function addSuvaniRow() {
   suvaniBody.insertRow().innerHTML = `
 <td></td>
@@ -183,13 +185,14 @@ function addSuvaniRow() {
   updateSuvaniSrNo();
 }
 
+/* SUVANI SR NO AFTER FAMILY */
 function updateSuvaniSrNo() {
-  const base = famSr;
   document.querySelectorAll("#suvaniBody tr").forEach((row, index) => {
-    row.cells[0].innerText = base + index + 1;
+    row.cells[0].innerText = famSr + index + 1;
   });
 }
 
+/* EXPORT WITH DARK BORDERS */
 function exportExcel() {
   const wb = XLSX.utils.book_new();
   const data = [];
@@ -214,17 +217,12 @@ function exportExcel() {
   ws["!cols"] = Array(14).fill({ wch: 20 });
 
   const range = XLSX.utils.decode_range(ws["!ref"]);
-  const border = {
-    top:{style:"thin"}, bottom:{style:"thin"},
-    left:{style:"thin"}, right:{style:"thin"}
-  };
+  const border = { top:{style:"thin"}, bottom:{style:"thin"}, left:{style:"thin"}, right:{style:"thin"} };
 
   for (let R = range.s.r; R <= range.e.r; ++R) {
     for (let C = range.s.c; C <= range.e.c; ++C) {
       const cell = XLSX.utils.encode_cell({r:R,c:C});
-      if (ws[cell]) {
-        ws[cell].s = { border, alignment:{horizontal:"center",vertical:"center",wrapText:true}};
-      }
+      if (ws[cell]) ws[cell].s = { border, alignment:{horizontal:"center",vertical:"center",wrapText:true}};
     }
   }
 
