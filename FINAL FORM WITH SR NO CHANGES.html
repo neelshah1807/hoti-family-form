@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Hoti Family Database</title>
+
+<style>
+body { font-family: Arial; background:#f4f6f8; padding:20px; }
+h1,h2 { text-align:center; }
+.common { background:#fff; padding:15px; border-radius:10px; margin-bottom:20px; }
+table { width:100%; border-collapse:collapse; background:#fff; margin-bottom:20px; }
+th, td { border:1px solid #ccc; padding:6px; text-align:center; }
+th { background:#007bff; color:white; font-size:13px; }
+input, select { width:100%; padding:5px; }
+button {
+  padding:10px 15px; font-size:15px; margin-top:10px;
+  background:#007bff; color:white; border:none; border-radius:6px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Hoti Family Details</h1>
+
+<div class="common">
+  <b>Hoti Name:</b><br>
+  <input id="hotiName" oninput="handleHotiChange()"><br><br>
+  <b>Hoti No:</b><br>
+  <input id="hotiNo" oninput="handleHotiChange()">
+</div>
+
+<!-- MAIN FAMILY MEMBERS -->
+<h2>Main Family Members</h2>
+<table id="familyTable">
+<tr>
+  <th>Sr No</th>
+  <th>Hoti Name</th>
+  <th>Hoti No</th>
+  <th>Name of Member</th>
+  <th>DOB</th>
+  <th>Age</th>
+  <th>Education</th>
+  <th>Mobile No</th>
+  <th>Station</th>
+  <th>Employment Type</th>
+  <th>Nature of Business / Service</th>
+  <th>Relation to Hoti Holder</th>
+  <th>Married</th>
+  <th>Origin Village of Spouse</th>
+</tr>
+<tbody id="familyBody"></tbody>
+</table>
+
+<button onclick="addFamilyRow()">Add Family Member</button>
+
+<!-- SUVANI SECTION -->
+<h2>Details of Married Daughters / Suvanis</h2>
+<table id="suvaniTable">
+<tr>
+  <th>Sr No</th>
+  <th>Hoti Name</th>
+  <th>Hoti No</th>
+  <th>Name of Suvani</th>
+  <th>DOB</th>
+  <th>Age</th>
+  <th>Education</th>
+  <th>Mobile No</th>
+  <th>Station</th>
+  <th>Occupation</th>
+  <th>Relation</th>
+  <th>Married</th>
+  <th>Origin Village of Spouse</th>
+</tr>
+<tbody id="suvaniBody"></tbody>
+</table>
+
+<button onclick="addSuvaniRow()">Add Suvani</button>
+
+<br><br>
+<button onclick="exportExcel()">Export to Excel (Formatted)</button>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+let famSr = 0;
+let autoCreated = false;
+
+/* HANDLE HOTI CHANGE */
+function handleHotiChange() {
+  const name = hotiName.value.trim();
+  const no   = hotiNo.value.trim();
+
+  if (!autoCreated && name && no) {
+    addFamilyRow();
+    addSuvaniRow();
+    autoCreated = true;
+  }
+
+  updateHotiInRows();
+  updateSuvaniSrNo();
+}
+
+/* UPDATE HOTI IN ALL ROWS */
+function updateHotiInRows() {
+  document.querySelectorAll("#familyBody tr").forEach(row => {
+    row.cells[1].children[0].value = hotiName.value;
+    row.cells[2].children[0].value = hotiNo.value;
+  });
+
+  document.querySelectorAll("#suvaniBody tr").forEach(row => {
+    row.cells[1].children[0].value = hotiName.value;
+    row.cells[2].children[0].value = hotiNo.value;
+  });
+}
+
+/* AGE CALCULATION */
+function calcAge(dobInput, ageInput) {
+  const dob = new Date(dobInput.value);
+  const today = new Date();
+
+  let years = today.getFullYear() - dob.getFullYear();
+  let months = today.getMonth() - dob.getMonth();
+
+  if (today.getDate() < dob.getDate()) months--;
+  if (months < 0) { years--; months += 12; }
+
+  ageInput.value = years <= 0 ? months + " months" : years;
+}
+
+/* NUMERIC ONLY */
+function numericOnly(el) {
+  el.value = el.value.replace(/[^0-9]/g, '');
+}
+
+/* MAIN FAMILY */
+function addFamilyRow() {
+  famSr++;
+  familyBody.insertRow().innerHTML = `
+<td>${famSr}</td>
+<td><input readonly></td>
+<td><input readonly></td>
+<td><input></td>
+<td><input type="date" onchange="calcAge(this,this.parentElement.nextElementSibling.children[0])"></td>
+<td><input readonly></td>
+<td><input></td>
+<td><input oninput="numericOnly(this)"></td>
+<td><input></td>
+<td>
+  <select>
+    <option></option>
+    <option>Self Employed</option>
+    <option>Employee</option>
+    <option>House Wife</option>
+    <option>Student</option>
+  </select>
+</td>
+<td><input></td>
+<td><input></td>
+<td>
+  <select>
+    <option></option>
+    <option>Yes</option>
+    <option>No</option>
+  </select>
+</td>
+<td><input></td>`;
+
+  updateHotiInRows();
+  updateSuvaniSrNo();
+}
+
+/* SUVANI */
+function addSuvaniRow() {
+  suvaniBody.insertRow().innerHTML = `
+<td></td>
+<td><input readonly></td>
+<td><input readonly></td>
+<td><input></td>
+<td><input type="date" onchange="calcAge(this,this.parentElement.nextElementSibling.children[0])"></td>
+<td><input readonly></td>
+<td><input></td>
+<td><input oninput="numericOnly(this)"></td>
+<td><input></td>
+<td><input></td>
+<td>Suvani</td>
+<td>Yes</td>
+<td><input></td>`;
+
+  updateHotiInRows();
+  updateSuvaniSrNo();
+}
+
+/* UPDATE SUVANI SR NO BASED ON FAMILY COUNT */
+function updateSuvaniSrNo() {
+  const base = famSr;
+  document.querySelectorAll("#suvaniBody tr").forEach((row, index) => {
+    row.cells[0].innerText = base + index + 1;
+  });
+}
+
+/* EXPORT (UNCHANGED) */
+function exportExcel() {
+  const wb = XLSX.utils.book_new();
+  const data = [];
+
+  function appendTable(tableId, title) {
+    const table = document.getElementById(tableId);
+    data.push([title], []);
+    data.push([...table.rows[0].cells].map(c => c.innerText));
+
+    for (let i = 1; i < table.rows.length; i++) {
+      data.push([...table.rows[i].cells].map(c => {
+        const el = c.querySelector("input,select");
+        return el ? el.value : c.innerText;
+      }));
+    }
+    data.push([], []);
+  }
+
+  appendTable("familyTable", "MAIN FAMILY MEMBERS");
+  appendTable("suvaniTable", "DETAILS OF MARRIED DAUGHTERS / SUVANIS");
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws["!cols"] = Array(14).fill({ wch: 20 });
+
+  XLSX.utils.book_append_sheet(wb, ws, "Hoti Family Data");
+  XLSX.writeFile(wb, (hotiNo.value || "Hoti_Database") + ".xlsx");
+}
+</script>
+
+</body>
+</html>
