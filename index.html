@@ -13,9 +13,11 @@ th, td { border:1px solid #ccc; padding:6px; text-align:center; }
 th { background:#007bff; color:white; font-size:13px; }
 input, select { width:100%; padding:5px; }
 button {
-  padding:10px 15px; font-size:15px; margin-top:10px;
+  padding:10px 15px; font-size:15px; margin:5px;
   background:#007bff; color:white; border:none; border-radius:6px;
+  cursor:pointer;
 }
+button:hover { background:#0056b3; }
 </style>
 </head>
 
@@ -36,39 +38,39 @@ button {
   <th>Sr No</th>
   <th>Hoti Name</th>
   <th>Hoti No</th>
-  <th>Name of Member</th>
+  <th>Name</th>
   <th>DOB</th>
   <th>Age</th>
   <th>Education</th>
-  <th>Mobile No</th>
+  <th>Mobile</th>
   <th>Station</th>
-  <th>Employment Type</th>
-  <th>Nature of Business / Service</th>
-  <th>Relation to Hoti Holder</th>
+  <th>Employment</th>
+  <th>Business</th>
+  <th>Relation</th>
   <th>Married</th>
-  <th>Origin Village of Spouse</th>
+  <th>Spouse Village</th>
 </tr>
 <tbody id="familyBody"></tbody>
 </table>
 
 <button onclick="addFamilyRow()">Add Family Member</button>
 
-<h2>Details of Married Daughters / Suvanis</h2>
+<h2>Married Daughters / Suvani</h2>
 <table id="suvaniTable">
 <tr>
   <th>Sr No</th>
   <th>Hoti Name</th>
   <th>Hoti No</th>
-  <th>Name of Suvani</th>
+  <th>Name</th>
   <th>DOB</th>
   <th>Age</th>
   <th>Education</th>
-  <th>Mobile No</th>
+  <th>Mobile</th>
   <th>Station</th>
   <th>Occupation</th>
   <th>Relation</th>
   <th>Married</th>
-  <th>Origin Village of Spouse</th>
+  <th>Spouse Village</th>
 </tr>
 <tbody id="suvaniBody"></tbody>
 </table>
@@ -76,23 +78,22 @@ button {
 <button onclick="addSuvaniRow()">Add Suvani</button>
 
 <br><br>
-<button onclick="exportExcel()">Export to Excel (Formatted)</button>
-
-<button onclick="submitToDatabase()">Submit & Save</button>  
+<button onclick="exportExcel()">Export Excel (Individual)</button>
+<button onclick="submitToDatabase()">Submit & Save (Database)</button>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
+/* 🔴 PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE */
+const SCRIPT_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
+
 let famSr = 0;
 let autoCreated = false;
 
-/* AUTO ADD ONLY FAMILY ROW */
+/* AUTO CREATE ONLY FAMILY ROW */
 function handleHotiChange() {
-  const name = hotiName.value.trim();
-  const no   = hotiNo.value.trim();
-
-  if (!autoCreated && name && no) {
-    addFamilyRow();      // ✅ ONLY FAMILY
+  if (!autoCreated && hotiName.value && hotiNo.value) {
+    addFamilyRow();
     autoCreated = true;
   }
   updateHotiInRows();
@@ -100,29 +101,27 @@ function handleHotiChange() {
 }
 
 function updateHotiInRows() {
-  document.querySelectorAll("#familyBody tr").forEach(row => {
-    row.cells[1].children[0].value = hotiName.value;
-    row.cells[2].children[0].value = hotiNo.value;
+  document.querySelectorAll("#familyBody tr").forEach(r => {
+    r.cells[1].children[0].value = hotiName.value;
+    r.cells[2].children[0].value = hotiNo.value;
   });
-
-  document.querySelectorAll("#suvaniBody tr").forEach(row => {
-    row.cells[1].children[0].value = hotiName.value;
-    row.cells[2].children[0].value = hotiNo.value;
+  document.querySelectorAll("#suvaniBody tr").forEach(r => {
+    r.cells[1].children[0].value = hotiName.value;
+    r.cells[2].children[0].value = hotiNo.value;
   });
 }
 
-function calcAge(dobInput, ageInput) {
-  const dob = new Date(dobInput.value);
-  const today = new Date();
-  let years = today.getFullYear() - dob.getFullYear();
-  let months = today.getMonth() - dob.getMonth();
-  if (today.getDate() < dob.getDate()) months--;
-  if (months < 0) { years--; months += 12; }
-  ageInput.value = years <= 0 ? months + " months" : years;
+function calcAge(dob, age) {
+  if (!dob.value) return;
+  const d = new Date(dob.value);
+  const t = new Date();
+  let y = t.getFullYear() - d.getFullYear();
+  if (t < new Date(t.getFullYear(), d.getMonth(), d.getDate())) y--;
+  age.value = y;
 }
 
 function numericOnly(el) {
-  el.value = el.value.replace(/[^0-9]/g, '');
+  el.value = el.value.replace(/[^0-9]/g,'');
 }
 
 /* FAMILY */
@@ -138,30 +137,18 @@ function addFamilyRow() {
 <td><input></td>
 <td><input oninput="numericOnly(this)"></td>
 <td><input></td>
-<td>
-  <select>
-    <option></option>
-    <option>Self Employed</option>
-    <option>Employee</option>
-    <option>House Wife</option>
-    <option>Student</option>
-  </select>
-</td>
+<td><input></td>
 <td><input></td>
 <td><input></td>
 <td>
-  <select>
-    <option></option>
-    <option>Yes</option>
-    <option>No</option>
-  </select>
+<select><option></option><option>Yes</option><option>No</option></select>
 </td>
 <td><input></td>`;
   updateHotiInRows();
   updateSuvaniSrNo();
 }
 
-/* SUVANI – ONLY ON BUTTON CLICK */
+/* SUVANI */
 function addSuvaniRow() {
   suvaniBody.insertRow().innerHTML = `
 <td></td>
@@ -176,116 +163,79 @@ function addSuvaniRow() {
 <td><input></td>
 <td>Suvani</td>
 <td>
-  <select>
-    <option></option>
-    <option>Yes</option>
-    <option>No</option>
-  </select>
+<select><option></option><option>Yes</option><option>No</option></select>
 </td>
 <td><input></td>`;
   updateHotiInRows();
   updateSuvaniSrNo();
 }
 
-/* SUVANI SR NO AFTER FAMILY */
 function updateSuvaniSrNo() {
-  document.querySelectorAll("#suvaniBody tr").forEach((row, index) => {
-    row.cells[0].innerText = famSr + index + 1;
+  document.querySelectorAll("#suvaniBody tr").forEach((r,i)=>{
+    r.cells[0].innerText = famSr + i + 1;
   });
 }
 
-/* EXPORT WITH DARK BORDERS */
+/* EXPORT INDIVIDUAL EXCEL */
 function exportExcel() {
   const wb = XLSX.utils.book_new();
-  const data = [];
-
-  function appendTable(tableId, title) {
-    const table = document.getElementById(tableId);
-    data.push([title], []);
-    data.push([...table.rows[0].cells].map(c => c.innerText));
-    for (let i = 1; i < table.rows.length; i++) {
-      data.push([...table.rows[i].cells].map(c => {
-        const el = c.querySelector("input,select");
-        return el ? el.value : c.innerText;
-      }));
-    }
-    data.push([], []);
-  }
-
-  appendTable("familyTable", "MAIN FAMILY MEMBERS");
-  appendTable("suvaniTable", "DETAILS OF MARRIED DAUGHTERS / SUVANIS");
-
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  ws["!cols"] = Array(14).fill({ wch: 20 });
-
-  const range = XLSX.utils.decode_range(ws["!ref"]);
-  const border = { top:{style:"thin"}, bottom:{style:"thin"}, left:{style:"thin"}, right:{style:"thin"} };
-
-  for (let R = range.s.r; R <= range.e.r; ++R) {
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cell = XLSX.utils.encode_cell({r:R,c:C});
-      if (ws[cell]) ws[cell].s = { border, alignment:{horizontal:"center",vertical:"center",wrapText:true}};
-    }
-  }
-
-  XLSX.utils.book_append_sheet(wb, ws, "Hoti Family Data");
-  XLSX.writeFile(wb, (hotiNo.value || "Hoti_Database") + ".xlsx");
+  const ws = XLSX.utils.table_to_sheet(document.getElementById("familyTable"));
+  XLSX.utils.book_append_sheet(wb, ws, "Family");
+  XLSX.writeFile(wb, (hotiNo.value || "Hoti") + ".xlsx");
 }
-<script>
+
+/* SAVE TO PRIVATE DATABASE */
 async function submitToDatabase() {
   const rows = [];
 
-  document.querySelectorAll("#familyBody tr").forEach(row => {
+  document.querySelectorAll("#familyBody tr").forEach(r=>{
     rows.push({
-      memberType: "Family",
-      hotiName: hotiName.value,
-      hotiNo: hotiNo.value,
-      name: row.cells[3].children[0].value,
-      dob: row.cells[4].children[0].value,
-      age: row.cells[5].children[0].value,
-      education: row.cells[6].children[0].value,
-      mobile: row.cells[7].children[0].value,
-      station: row.cells[8].children[0].value,
-      employment: row.cells[9].children[0].value,
-      business: row.cells[10].children[0].value,
-      relation: row.cells[11].children[0].value,
-      married: row.cells[12].children[0].value,
-      spouseVillage: row.cells[13].children[0].value
+      type:"Family",
+      hotiName:hotiName.value,
+      hotiNo:hotiNo.value,
+      name:r.cells[3].children[0].value,
+      dob:r.cells[4].children[0].value,
+      age:r.cells[5].children[0].value,
+      education:r.cells[6].children[0].value,
+      mobile:r.cells[7].children[0].value,
+      station:r.cells[8].children[0].value,
+      employment:r.cells[9].children[0].value,
+      business:r.cells[10].children[0].value,
+      relation:r.cells[11].children[0].value,
+      married:r.cells[12].children[0].value,
+      spouse:r.cells[13].children[0].value
     });
   });
 
-  document.querySelectorAll("#suvaniBody tr").forEach(row => {
+  document.querySelectorAll("#suvaniBody tr").forEach(r=>{
     rows.push({
-      memberType: "Suvani",
-      hotiName: hotiName.value,
-      hotiNo: hotiNo.value,
-      name: row.cells[3].children[0].value,
-      dob: row.cells[4].children[0].value,
-      age: row.cells[5].children[0].value,
-      education: row.cells[6].children[0].value,
-      mobile: row.cells[7].children[0].value,
-      station: row.cells[8].children[0].value,
-      employment: row.cells[9].children[0].value,
-      business: "",
-      relation: "Suvani",
-      married: row.cells[11].children[0].value,
-      spouseVillage: row.cells[12].children[0].value
+      type:"Suvani",
+      hotiName:hotiName.value,
+      hotiNo:hotiNo.value,
+      name:r.cells[3].children[0].value,
+      dob:r.cells[4].children[0].value,
+      age:r.cells[5].children[0].value,
+      education:r.cells[6].children[0].value,
+      mobile:r.cells[7].children[0].value,
+      station:r.cells[8].children[0].value,
+      employment:r.cells[9].children[0].value,
+      business:"",
+      relation:"Suvani",
+      married:r.cells[11].children[0].value,
+      spouse:r.cells[12].children[0].value
     });
   });
 
-  await fetch("PASTE_YOUR_SCRIPT_URL_HERE", {
-    method: "POST",
-    body: JSON.stringify({ rows }),
-    headers: { "Content-Type": "application/json" }
+  await fetch(SCRIPT_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({rows})
   });
 
-  alert("Data submitted successfully!");
+  alert("Data saved successfully!");
 }
-</script>
-
 </script>
 
 </body>
 </html>
-
 
