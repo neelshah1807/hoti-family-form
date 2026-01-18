@@ -27,7 +27,7 @@ button:hover { background:#0056b3; }
 
 <!-- 🔴 PASTE WEB APP URL BELOW -->
 <form method="POST"
-      action="https://script.google.com/macros/s/AKfycbyuo96hVDBDYkpMNSVBNj_Fq3voyXF-3bMXBy2iYoaoKWdbc4fbnc0a_3rmVBLm9dsqEg/exec"
+      action="PASTE_YOUR_WEB_APP_URL_HERE"
       target="_blank"
       onsubmit="prepareSubmission()">
 
@@ -40,13 +40,22 @@ button:hover { background:#0056b3; }
 
 <h2>Main Family Members</h2>
 <table>
-<thead>
 <tr>
-  <th>Sr</th><th>Name</th><th>DOB</th><th>Age</th><th>Education</th>
-  <th>Mobile</th><th>Station</th><th>Employment</th>
-  <th>Business</th><th>Relation</th><th>Married</th><th>Spouse Village</th>
+  <th>Sr No</th>
+  <th>Hoti Name</th>
+  <th>Hoti No</th>
+  <th>Name</th>
+  <th>DOB</th>
+  <th>Age</th>
+  <th>Education</th>
+  <th>Mobile</th>
+  <th>Station</th>
+  <th>Employment</th>
+  <th>Business</th>
+  <th>Relation</th>
+  <th>Married</th>
+  <th>Spouse Village</th>
 </tr>
-</thead>
 <tbody id="familyBody"></tbody>
 </table>
 
@@ -54,24 +63,30 @@ button:hover { background:#0056b3; }
 
 <h2>Married Daughters / Suvani</h2>
 <table>
-<thead>
 <tr>
-  <th>Sr</th><th>Name</th><th>DOB</th><th>Age</th><th>Education</th>
-  <th>Mobile</th><th>Station</th><th>Occupation</th>
-  <th>Married</th><th>Spouse Village</th>
+  <th>Sr No</th>
+  <th>Hoti Name</th>
+  <th>Hoti No</th>
+  <th>Name</th>
+  <th>DOB</th>
+  <th>Age</th>
+  <th>Education</th>
+  <th>Mobile</th>
+  <th>Station</th>
+  <th>Occupation</th>
+  <th>Relation</th>
+  <th>Married</th>
+  <th>Spouse Village</th>
 </tr>
-</thead>
 <tbody id="suvaniBody"></tbody>
 </table>
 
 <button type="button" onclick="addSuvaniRow()">Add Suvani</button>
 
-<!-- Hidden payload -->
 <input type="hidden" name="payload" id="payload">
 
 <br><br>
 <button type="submit">Submit & Save (Database)</button>
-<button type="button" onclick="exportExcel()">Export Excel (Individual)</button>
 
 </form>
 
@@ -81,13 +96,29 @@ button:hover { background:#0056b3; }
 let famSr = 0;
 let autoCreated = false;
 
+/* AUTO CREATE FIRST FAMILY ROW */
 function handleHotiChange() {
   if (!autoCreated && hotiName.value && hotiNo.value) {
     addFamilyRow();
     autoCreated = true;
   }
+  updateHotiInRows();
+  updateSuvaniSrNo();
 }
 
+/* REALTIME HOTI NAME / NO */
+function updateHotiInRows() {
+  document.querySelectorAll("#familyBody tr").forEach(r=>{
+    r.cells[1].children[0].value = hotiName.value;
+    r.cells[2].children[0].value = hotiNo.value;
+  });
+  document.querySelectorAll("#suvaniBody tr").forEach(r=>{
+    r.cells[1].children[0].value = hotiName.value;
+    r.cells[2].children[0].value = hotiNo.value;
+  });
+}
+
+/* AGE CALCULATOR */
 function calcAge(dob, age) {
   if (!dob.value) return;
   const d = new Date(dob.value);
@@ -99,14 +130,18 @@ function calcAge(dob, age) {
   age.value = years <= 0 ? months + " months" : years;
 }
 
+/* MOBILE NUMERIC ONLY */
 function numericOnly(el) {
   el.value = el.value.replace(/[^0-9]/g,'');
 }
 
+/* ADD FAMILY */
 function addFamilyRow() {
   famSr++;
   familyBody.insertRow().innerHTML = `
 <td>${famSr}</td>
+<td><input readonly></td>
+<td><input readonly></td>
 <td><input></td>
 <td><input type="date" onchange="calcAge(this,this.parentElement.nextElementSibling.children[0])"></td>
 <td><input readonly></td>
@@ -120,11 +155,16 @@ function addFamilyRow() {
 <select><option></option><option>Yes</option><option>No</option></select>
 </td>
 <td><input></td>`;
+  updateHotiInRows();
+  updateSuvaniSrNo();
 }
 
+/* ADD SUVANI */
 function addSuvaniRow() {
   suvaniBody.insertRow().innerHTML = `
 <td></td>
+<td><input readonly></td>
+<td><input readonly></td>
 <td><input></td>
 <td><input type="date" onchange="calcAge(this,this.parentElement.nextElementSibling.children[0])"></td>
 <td><input readonly></td>
@@ -132,55 +172,60 @@ function addSuvaniRow() {
 <td><input oninput="numericOnly(this)"></td>
 <td><input></td>
 <td><input></td>
+<td>Suvani</td>
 <td>
 <select><option></option><option>Yes</option><option>No</option></select>
 </td>
 <td><input></td>`;
+  updateHotiInRows();
+  updateSuvaniSrNo();
 }
 
+/* SUVANI SR CONTINUES AFTER FAMILY */
+function updateSuvaniSrNo() {
+  document.querySelectorAll("#suvaniBody tr").forEach((r,i)=>{
+    r.cells[0].innerText = famSr + i + 1;
+  });
+}
+
+/* PREPARE DATA FOR POST */
 function prepareSubmission() {
   const rows = [];
 
   document.querySelectorAll("#familyBody tr").forEach(r=>{
     rows.push({
       type:"Family",
-      name:r.cells[1].children[0].value,
-      dob:r.cells[2].children[0].value,
-      age:r.cells[3].children[0].value,
-      education:r.cells[4].children[0].value,
-      mobile:r.cells[5].children[0].value,
-      station:r.cells[6].children[0].value,
-      employment:r.cells[7].children[0].value,
-      business:r.cells[8].children[0].value,
-      relation:r.cells[9].children[0].value,
-      married:r.cells[10].children[0].value,
-      spouse:r.cells[11].children[0].value
+      name:r.cells[3].children[0].value,
+      dob:r.cells[4].children[0].value,
+      age:r.cells[5].children[0].value,
+      education:r.cells[6].children[0].value,
+      mobile:r.cells[7].children[0].value,
+      station:r.cells[8].children[0].value,
+      employment:r.cells[9].children[0].value,
+      business:r.cells[10].children[0].value,
+      relation:r.cells[11].children[0].value,
+      married:r.cells[12].children[0].value,
+      spouse:r.cells[13].children[0].value
     });
   });
 
   document.querySelectorAll("#suvaniBody tr").forEach(r=>{
     rows.push({
       type:"Suvani",
-      name:r.cells[1].children[0].value,
-      dob:r.cells[2].children[0].value,
-      age:r.cells[3].children[0].value,
-      education:r.cells[4].children[0].value,
-      mobile:r.cells[5].children[0].value,
-      station:r.cells[6].children[0].value,
-      employment:r.cells[7].children[0].value,
-      married:r.cells[8].children[0].value,
-      spouse:r.cells[9].children[0].value
+      name:r.cells[3].children[0].value,
+      dob:r.cells[4].children[0].value,
+      age:r.cells[5].children[0].value,
+      education:r.cells[6].children[0].value,
+      mobile:r.cells[7].children[0].value,
+      station:r.cells[8].children[0].value,
+      employment:r.cells[9].children[0].value,
+      relation:"Suvani",
+      married:r.cells[11].children[0].value,
+      spouse:r.cells[12].children[0].value
     });
   });
 
   document.getElementById("payload").value = JSON.stringify(rows);
-}
-
-function exportExcel() {
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.table_to_sheet(document.querySelector("table"));
-  XLSX.utils.book_append_sheet(wb, ws, "Family");
-  XLSX.writeFile(wb, "Hoti_Family.xlsx");
 }
 </script>
 
