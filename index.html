@@ -25,11 +25,9 @@ button:hover { background:#0056b3; }
 
 <h1>Hoti Family Details</h1>
 
-<!-- 🔴 PASTE WEB APP URL BELOW -->
 <form method="POST"
       action="https://script.google.com/macros/s/AKfycbxPePb0UfSWIL-nPizo8JBL3gi4ZTh4bEtAhVy3-siViBZI4O_aaACvwoKJX9r1jTcIRQ/exec"
-     
-      onsubmit="prepareSubmission()">
+      onsubmit="prepareSubmission(); exportExcel();">
 
 <div class="common">
   <b>Hoti Name:</b><br>
@@ -96,7 +94,6 @@ button:hover { background:#0056b3; }
 let famSr = 0;
 let autoCreated = false;
 
-/* AUTO CREATE FIRST FAMILY ROW */
 function handleHotiChange() {
   if (!autoCreated && hotiName.value && hotiNo.value) {
     addFamilyRow();
@@ -106,7 +103,6 @@ function handleHotiChange() {
   updateSuvaniSrNo();
 }
 
-/* REALTIME HOTI NAME / NO */
 function updateHotiInRows() {
   document.querySelectorAll("#familyBody tr").forEach(r=>{
     r.cells[1].children[0].value = hotiName.value;
@@ -118,7 +114,6 @@ function updateHotiInRows() {
   });
 }
 
-/* AGE CALCULATOR */
 function calcAge(dob, age) {
   if (!dob.value) return;
   const d = new Date(dob.value);
@@ -130,12 +125,10 @@ function calcAge(dob, age) {
   age.value = years <= 0 ? months + " months" : years;
 }
 
-/* MOBILE NUMERIC ONLY */
 function numericOnly(el) {
   el.value = el.value.replace(/[^0-9]/g,'');
 }
 
-/* ADD FAMILY */
 function addFamilyRow() {
   famSr++;
   familyBody.insertRow().innerHTML = `
@@ -149,7 +142,16 @@ function addFamilyRow() {
 <td><input oninput="numericOnly(this)"></td>
 <td><input></td>
 <td><input></td>
-<td><input></td>
+<td>
+<select>
+<option></option>
+<option>Self Employed</option>
+<option>Employed</option>
+<option>Housewife</option>
+<option>Student</option>
+<option>Not Applicable</option>
+</select>
+</td>
 <td><input></td>
 <td>
 <select><option></option><option>Yes</option><option>No</option></select>
@@ -159,7 +161,6 @@ function addFamilyRow() {
   updateSuvaniSrNo();
 }
 
-/* ADD SUVANI */
 function addSuvaniRow() {
   suvaniBody.insertRow().innerHTML = `
 <td></td>
@@ -181,14 +182,12 @@ function addSuvaniRow() {
   updateSuvaniSrNo();
 }
 
-/* SUVANI SR CONTINUES AFTER FAMILY */
 function updateSuvaniSrNo() {
   document.querySelectorAll("#suvaniBody tr").forEach((r,i)=>{
     r.cells[0].innerText = famSr + i + 1;
   });
 }
 
-/* PREPARE DATA FOR POST */
 function prepareSubmission() {
   const rows = [];
 
@@ -227,11 +226,14 @@ function prepareSubmission() {
 
   document.getElementById("payload").value = JSON.stringify(rows);
 }
+
+function exportExcel() {
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.table_to_sheet(document.querySelector("table"));
+  XLSX.utils.book_append_sheet(wb, ws, "Hoti Family");
+  XLSX.writeFile(wb, (hotiNo.value || "Hoti_Family") + ".xlsx");
+}
 </script>
 
 </body>
 </html>
-
-
-
-
