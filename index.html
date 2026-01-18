@@ -25,10 +25,11 @@ button:hover { background:#0056b3; }
 
 <h1>Hoti Family Details</h1>
 
+<!-- 🔴 PASTE WEB APP URL BELOW -->
 <form method="POST"
-action="https://script.google.com/macros/s/AKfycbwcCxbfOZjYP35ii1BE_I9NrVFJ-mwC5s2lJzB7lMBYlPHHrEyk1vGF-D_hqXW9AxNJvQ/exec"
-target="_blank"
-onsubmit="prepareSubmission()">
+      action="https://script.google.com/macros/s/AKfycbyuo96hVDBDYkpMNSVBNj_Fq3voyXF-3bMXBy2iYoaoKWdbc4fbnc0a_3rmVBLm9dsqEg/exec"
+      target="_blank"
+      onsubmit="prepareSubmission()">
 
 <div class="common">
   <b>Hoti Name:</b><br>
@@ -65,7 +66,7 @@ onsubmit="prepareSubmission()">
 
 <button type="button" onclick="addSuvaniRow()">Add Suvani</button>
 
-<!-- HIDDEN FIELD FOR ALL DATA -->
+<!-- Hidden payload -->
 <input type="hidden" name="payload" id="payload">
 
 <br><br>
@@ -87,15 +88,30 @@ function handleHotiChange() {
   }
 }
 
+function calcAge(dob, age) {
+  if (!dob.value) return;
+  const d = new Date(dob.value);
+  const t = new Date();
+  let years = t.getFullYear() - d.getFullYear();
+  let months = t.getMonth() - d.getMonth();
+  if (t.getDate() < d.getDate()) months--;
+  if (months < 0) { years--; months += 12; }
+  age.value = years <= 0 ? months + " months" : years;
+}
+
+function numericOnly(el) {
+  el.value = el.value.replace(/[^0-9]/g,'');
+}
+
 function addFamilyRow() {
   famSr++;
   familyBody.insertRow().innerHTML = `
 <td>${famSr}</td>
 <td><input></td>
-<td><input type="date"></td>
+<td><input type="date" onchange="calcAge(this,this.parentElement.nextElementSibling.children[0])"></td>
+<td><input readonly></td>
 <td><input></td>
-<td><input></td>
-<td><input></td>
+<td><input oninput="numericOnly(this)"></td>
 <td><input></td>
 <td><input></td>
 <td><input></td>
@@ -110,10 +126,10 @@ function addSuvaniRow() {
   suvaniBody.insertRow().innerHTML = `
 <td></td>
 <td><input></td>
-<td><input type="date"></td>
+<td><input type="date" onchange="calcAge(this,this.parentElement.nextElementSibling.children[0])"></td>
+<td><input readonly></td>
 <td><input></td>
-<td><input></td>
-<td><input></td>
+<td><input oninput="numericOnly(this)"></td>
 <td><input></td>
 <td><input></td>
 <td>
@@ -123,10 +139,10 @@ function addSuvaniRow() {
 }
 
 function prepareSubmission() {
-  const data = [];
+  const rows = [];
 
   document.querySelectorAll("#familyBody tr").forEach(r=>{
-    data.push({
+    rows.push({
       type:"Family",
       name:r.cells[1].children[0].value,
       dob:r.cells[2].children[0].value,
@@ -143,7 +159,7 @@ function prepareSubmission() {
   });
 
   document.querySelectorAll("#suvaniBody tr").forEach(r=>{
-    data.push({
+    rows.push({
       type:"Suvani",
       name:r.cells[1].children[0].value,
       dob:r.cells[2].children[0].value,
@@ -157,7 +173,7 @@ function prepareSubmission() {
     });
   });
 
-  document.getElementById("payload").value = JSON.stringify(data);
+  document.getElementById("payload").value = JSON.stringify(rows);
 }
 
 function exportExcel() {
