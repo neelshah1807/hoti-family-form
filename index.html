@@ -48,11 +48,11 @@ button:hover { background:#0056b3; }
   <th>Education</th>
   <th>Mobile</th>
   <th>Station</th>
-  <th>Business</th>
   <th>Employment</th>
+  <th>Business</th>
   <th>Relation</th>
   <th>Married</th>
-  <th>Spouse Village</th>
+  <th>Origin Village of Spouse</th>
 </tr>
 <tbody id="familyBody"></tbody>
 </table>
@@ -74,7 +74,7 @@ button:hover { background:#0056b3; }
   <th>Occupation</th>
   <th>Relation</th>
   <th>Married</th>
-  <th>Spouse Village</th>
+  <th>Origin Village of Spouse</th>
 </tr>
 <tbody id="suvaniBody"></tbody>
 </table>
@@ -141,7 +141,6 @@ function addFamilyRow() {
 <td><input></td>
 <td><input oninput="numericOnly(this)"></td>
 <td><input></td>
-<td><input></td>
 <td>
 <select>
 <option></option>
@@ -152,6 +151,7 @@ function addFamilyRow() {
 <option>Not Applicable</option>
 </select>
 </td>
+<td><input></td>
 <td><input></td>
 <td>
 <select><option></option><option>Yes</option><option>No</option></select>
@@ -227,13 +227,12 @@ function prepareSubmission() {
   document.getElementById("payload").value = JSON.stringify(rows);
 }
 
-/* 🔴 ONLY FIXED FUNCTION – NOTHING ELSE CHANGED */
 function exportExcel() {
   const data = [];
 
   data.push([
     "Sr No","Hoti Name","Hoti No","Name","DOB","Age","Education",
-    "Mobile","Station","Business","Employment","Relation","Married","Spouse Village"
+    "Mobile","Station","Employment","Business","Relation","Married","Origin Village of Spouse"
   ]);
 
   document.querySelectorAll("#familyBody tr").forEach(r=>{
